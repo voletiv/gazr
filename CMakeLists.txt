@@ -3,8 +3,8 @@ project(attention_tracker)
 
 add_definitions(-std=c++11)
 
-set(DLIB_PATH "" CACHE PATH "Path to DLIB")
-include(${DLIB_PATH}/dlib/cmake)
+find_package(dlib REQUIRED)
+include_directories(${dlib_INCLUDE_DIRS})
 
 option(DEBUG "Enable debug visualizations" ON)
 option(WITH_TESTS "Compile sample test application" ON)
@@ -54,7 +54,7 @@ endif()
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 add_library(head_pose_estimation SHARED src/head_pose_estimation.cpp)
-target_link_libraries(head_pose_estimation dlib ${OpenCV_LIBRARIES})
+target_link_libraries(head_pose_estimation ${dlib_LIBRARIES} ${OpenCV_LIBRARIES})
 
 if(WITH_ROS)
 
