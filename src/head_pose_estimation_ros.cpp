@@ -8,7 +8,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
     //ROS initialization
-    ros::init(argc, argv, "ros_markers");
+    ros::init(argc, argv, "ros_attention_tracker");
     ros::NodeHandle rosNode;
     ros::NodeHandle _private_node("~");
 
