@@ -27,12 +27,7 @@ support for other operating systems!
 ### Pre-requisites
 
 You need to [download](http://dlib.net/) and extract ``Dlib`` somewhere. This
-application has been tested with ``dlib-18.16``.
-
-**Important**: due to a bug in ``dlib``, you **must** manually modify ``dlib``'s
-``CMakeLists.txt`` before compiling: open it
-(``$DLIB_ROOT/dlib/CMakelists.txt``) and add ``add_definitions(-fPIC)`` near the
-top (around line 20).
+application requires ``dlib >= 18.18``.
 
 ### Installation
 
@@ -40,12 +35,9 @@ The library uses a standard ``CMake`` workflow:
 
 ```
 $ mkdir build && cd build
-$ cmake -DDLIB_PATH=<path to dlib> ..
+$ cmake ..
 $ make
 ```
-
-Note that the first time you compile the project, ``dlib`` will compile as well.
-It takes a few minutes. This won't happen the next times.
 
 Run ``head_pose_test ../share/shape_predictor_68_face_landmarks.dat`` to test
 the library. You should get something very similar to the picture above.
