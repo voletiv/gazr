@@ -1,5 +1,7 @@
 #include "ros_head_pose_estimator.hpp"
 
+#include "tf/transform_listener.h"
+
 using namespace std;
 using namespace cv;
 
@@ -13,7 +15,8 @@ HeadPoseEstimator::HeadPoseEstimator(ros::NodeHandle& rosNode,
             rosNode(rosNode),
             it(rosNode),
             warnUncalibratedImage(true),
-            estimator(modelFilename)
+            estimator(modelFilename),
+            minr(0), miny(0), minp(0)
 
 {
     sub = it.subscribeCamera("image", 1, &HeadPoseEstimator::detectFaces, this);
@@ -87,11 +90,23 @@ void HeadPoseEstimator::detectFaces(const sensor_msgs::ImageConstPtr& msg,
         mrot.getRotation(qrot);
         face_pose.setRotation(qrot);
 
-        br.sendTransform(
-                tf::StampedTransform(face_pose, 
+                tf::StampedTransform transform(face_pose, 
                                      ros::Time::now() + ros::Duration(TRANSFORM_FUTURE_DATING), 
                                      cameramodel.tfFrame(),
-                                     "face_" + to_string(face_idx)));
+                                     "face_" + to_string(face_idx));
+                br.sendTransform(transform);
+
+//    tf::TransformListener tf;
+//    tf.waitForTransform("face_0", "head_tracking_camera", ros::Time(), ros::Duration(1.0));
+//    tf::StampedTransform echo_transform;
+//    tf.lookupTransform("face_0", "head_tracking_camera", ros::Time(), echo_transform);
+    double yaw, pitch, roll;
+    transform.getBasis().getRPY(roll, pitch, yaw);
+    minp = max(minp, abs(pitch));
+    minr = max(minr, abs(roll));
+    miny = max(miny, abs(yaw));
+    ROS_INFO_STREAM("Rotation in RPY (degree) [" <<  roll*180.0/M_PI << ", " << pitch*180.0/M_PI << ", " << yaw*180.0/M_PI << "]" << std::endl);
+    ROS_INFO_STREAM("Max Rotation in RPY (degree) [" <<  minr*180.0/M_PI << ", " << minp*180.0/M_PI << ", " << miny*180.0/M_PI << "]" << std::endl);
 
     }
 

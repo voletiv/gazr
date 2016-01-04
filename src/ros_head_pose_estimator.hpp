@@ -47,6 +47,7 @@ private:
 
     bool warnUncalibratedImage;
 
+    double minr, miny, minp;
     void detectFaces(const sensor_msgs::ImageConstPtr& msg,
                      const sensor_msgs::CameraInfoConstPtr& camerainfo);
 };

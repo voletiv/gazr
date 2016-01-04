@@ -155,7 +155,6 @@ head_pose HeadPoseEstimation::pose(size_t face_idx) const
     Matx33d rotation;
     Rodrigues(rvec, rotation);
 
-
     head_pose pose = {
         rotation(0,0),    rotation(0,1),    rotation(0,2),    tvec.at<double>(0)/1000,
         rotation(1,0),    rotation(1,1),    rotation(1,2),    tvec.at<double>(1)/1000,
@@ -164,6 +163,7 @@ head_pose HeadPoseEstimation::pose(size_t face_idx) const
     };
 
 #ifdef HEAD_POSE_ESTIMATION_DEBUG
+
 
     std::vector<Point2f> reprojected_points;
 

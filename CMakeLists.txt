@@ -7,7 +7,7 @@ find_package(dlib REQUIRED)
 include_directories(${dlib_INCLUDE_DIRS})
 
 option(DEBUG "Enable debug visualizations" ON)
-option(WITH_TESTS "Compile sample test application" ON)
+option(WITH_TOOLS "Compile sample tools" ON)
 option(WITH_ROS "Build ROS nodes -- Requires OpenCV2!" OFF)
 
 if(WITH_ROS)
@@ -76,30 +76,28 @@ if(WITH_ROS)
 
     install(FILES
         launch/attention_tracking.launch
+        launch/attention_tracking_gscam.launch
         calib/logitech-c920_640x360.ini
         share/shape_predictor_68_face_landmarks.dat
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
     )
 endif()
 
-if(WITH_TESTS)
+if(WITH_TOOLS)
+
     if(OPENCV3)
-        if (DEBUG)
-            find_package(OpenCV COMPONENTS core imgproc calib3d highgui imgcodecs videoio REQUIRED)
-        else()
-            find_package(OpenCV COMPONENTS core imgproc calib3d imgcodecs videoio REQUIRED)
-        endif()
+        find_package(OpenCV COMPONENTS core imgproc calib3d highgui imgcodecs videoio REQUIRED)
     else()
         find_package(OpenCV COMPONENTS core imgproc calib3d highgui REQUIRED)
     endif()
 
-    add_executable(head_pose_single_frame samples/head_pose_estimation_single_frame.cpp)
-    target_link_libraries(head_pose_single_frame head_pose_estimation ${OpenCV_LIBRARIES})
+    find_package(Boost COMPONENTS program_options REQUIRED)
 
-    if(DEBUG)
-	    add_executable(head_pose_test samples/head_pose_estimation_test.cpp)
-	    target_link_libraries(head_pose_test head_pose_estimation ${OpenCV_LIBRARIES})
-    endif()
+    add_executable(benchmark_head_pose_single_frame tools/benchmark_head_pose_estimation_single_frame.cpp)
+    target_link_libraries(benchmark_head_pose_single_frame head_pose_estimation ${OpenCV_LIBRARIES})
+
+    add_executable(show_head_pose tools/show_head_pose.cpp)
+    target_link_libraries(show_head_pose head_pose_estimation ${OpenCV_LIBRARIES})
 
 endif()
 

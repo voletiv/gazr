@@ -1,10 +1,15 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
+#include <iomanip>
 
 #include "../src/head_pose_estimation.hpp"
 
 using namespace std;
 using namespace cv;
+
+inline double todeg(double rad) {
+    return rad * 180 / M_PI;
+}
 
 int main(int argc, char **argv)
 {
@@ -47,7 +52,20 @@ int main(int argc, char **argv)
 
         for(auto pose : estimator.poses()) {
 
-        cout << "Head pose: (" << pose(0,3) << ", " << pose(1,3) << ", " << pose(2,3) << ")" << endl;
+        cout << fixed << setprecision(4) << "Head pose: (" << pose(0,3) << ", " << pose(1,3) << ", " << pose(2,3) << ")" << endl;
+
+        // compute the quaternion, taken from https://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions
+        double qi = 0.5 * sqrt(1 + pose(0,0) - pose(1,1) - pose(2,2));
+        double qj = 0.25 / qi * (pose(0,1) + pose(1,0));
+        double qk = 0.25 / qi * (pose(0,2) + pose(2,0));
+        double qr = 0.25 / qi * (pose(2,1) - pose(1,2));
+
+        // compute yaw, pitch, roll
+        double roll = atan2(2 * (qr * qi + qj * qk), 1 - 2 * (qi*qi + qj * qj));
+        double pitch = asin(2 * (qr * qj - qk * qi));
+        double yaw  = atan2(2 * (qr * qk + qi * qj), 1 - 2 * (qj * qj + qk * qk));
+
+        cout << setprecision(1) << fixed << "Orientation: yaw=" << todeg(yaw) << ", pitch=" << todeg(pitch) << ", roll=" << todeg(roll) << endl;
         auto t_end = getTickCount();
         cout << "Processing time for this frame: " << (t_end-t_start) / getTickFrequency() * 1000. << "ms" << endl;
 
