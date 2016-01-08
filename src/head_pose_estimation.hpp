@@ -81,7 +81,26 @@ private:
     std::vector<dlib::full_object_detection> shapes;
 
 
-    /** Return the point corresponding to the dictionary marker.
+    /** Returns a pair (left eye ROI, right eye ROI) in a given detected face
+     */
+    std::pair<cv::Rect,cv::Rect> eyesROI(const dlib::full_object_detection& face) const;
+
+    /** Returns the position of the left and right pupils, relative to the left
+     * and right center of the eye, normalized with respect to the width/height
+     * of each eye.
+     *
+     *   (0.0, 0.0)    (-1.0, 0.0)      (0.0, 1.0)   (1.0, 0.0) ...
+     *    _______        _______        _______       _______
+     *   /       \      /       \      /   O   \     /       \
+     *  <    O    >    < O       >    <         >   <       O >
+     *   \_______/      \_______/      \_______/     \_______/
+     *
+     */
+    std::pair<cv::Point2f, cv::Point2f>
+    pupilsRelativePose(cv::InputArray image, 
+                       const dlib::full_object_detection& face) const;
+
+    /** Returns the point corresponding to the dictionary marker.
     */
     cv::Point2f coordsOf(size_t face_idx, FACIAL_FEATURE feature) const;
 
