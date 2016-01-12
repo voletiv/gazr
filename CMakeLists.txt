@@ -96,6 +96,9 @@ if(WITH_TOOLS)
     add_executable(benchmark_head_pose_single_frame tools/benchmark_head_pose_estimation_single_frame.cpp)
     target_link_libraries(benchmark_head_pose_single_frame head_pose_estimation ${OpenCV_LIBRARIES})
 
+    add_executable(estimate_head_direction tools/estimate_head_direction.cpp)
+    target_link_libraries(estimate_head_direction head_pose_estimation ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
+
     add_executable(show_head_pose tools/show_head_pose.cpp)
     target_link_libraries(show_head_pose head_pose_estimation ${OpenCV_LIBRARIES})
 
