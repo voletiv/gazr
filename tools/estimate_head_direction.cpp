@@ -36,7 +36,6 @@ int main(int argc, char **argv)
     desc.add_options()
             ("help,h", "produce help message")
             ("show,s", "display the image with gaze estimation")
-            ("cam,c", "use the first webcam instead of an image")
             ("model", po::value<string>(), "dlib's trained face model")
             ("image", po::value<string>(), "image to process (png, jpg)")
             ;
@@ -56,10 +55,6 @@ int main(int argc, char **argv)
     if (vm.count("show")) {
         show_frame = true;
     }
-    if (vm.count("cam")) {
-        use_camera = true;
-    }
-
 
     if (vm.count("model") == 0) {
         cout << "You must specify the path to a trained dlib's face model\n"
@@ -67,12 +62,9 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if (vm.count("image") == 0 && vm.count("cam") == 0) {
-        cout << "You must specify either an image to process of --cam to use the webcam" << endl;
-        return 1;
+    if (vm.count("image") == 0) {
+        use_camera = true;
     }
-
-
 
     auto estimator = HeadPoseEstimation(vm["model"].as<string>());
 
@@ -109,7 +101,11 @@ int main(int argc, char **argv)
     }
 
     while(true) {
-        if(use_camera) video_in >> frame;
+        if(use_camera) {
+            auto ok = video_in.read(frame);
+            if (!ok) break;
+        }
+
 
         estimator.update(frame);
 
