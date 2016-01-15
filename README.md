@@ -1,9 +1,13 @@
-Attention Tracker
-=================
-
+gazr
+====
 
 ![Face tracking for head pose estimation](doc/screenshot.jpg)
 
+*gazr* is a library and a set of tools for real-time gaze estimation from a
+monocular camera (typically, a webcam).
+
+Currently, it only performs 6D head pose estimation. Eye orientation based on
+pupil tracking is being worked on.
 
 Head pose estimation
 --------------------
