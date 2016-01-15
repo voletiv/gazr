@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(attention_tracker)
+project(gazr)
 
 add_definitions(-std=c++11)
 
@@ -53,8 +53,8 @@ endif()
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-add_library(head_pose_estimation SHARED src/head_pose_estimation.cpp)
-target_link_libraries(head_pose_estimation ${dlib_LIBRARIES} ${OpenCV_LIBRARIES})
+add_library(gazr SHARED src/head_pose_estimation.cpp)
+target_link_libraries(gazr ${dlib_LIBRARIES} ${OpenCV_LIBRARIES})
 
 if(WITH_ROS)
 
@@ -66,9 +66,9 @@ if(WITH_ROS)
     target_link_libraries(estimate_focus ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
     add_executable(estimate src/head_pose_estimation_ros.cpp src/ros_head_pose_estimator.cpp)
-    target_link_libraries(estimate head_pose_estimation ${catkin_LIBRARIES})
+    target_link_libraries(estimate gazr ${catkin_LIBRARIES})
 
-    install(TARGETS estimate_focus head_pose_estimation estimate
+    install(TARGETS estimate_focus gazr estimate
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -93,14 +93,14 @@ if(WITH_TOOLS)
 
     find_package(Boost COMPONENTS program_options REQUIRED)
 
-    add_executable(benchmark_head_pose_single_frame tools/benchmark_head_pose_estimation_single_frame.cpp)
-    target_link_libraries(benchmark_head_pose_single_frame head_pose_estimation ${OpenCV_LIBRARIES})
+    add_executable(gazr_benchmark_head_pose_single_frame tools/benchmark_head_pose_estimation_single_frame.cpp)
+    target_link_libraries(gazr_benchmark_head_pose_single_frame gazr ${OpenCV_LIBRARIES})
 
-    add_executable(estimate_head_direction tools/estimate_head_direction.cpp)
-    target_link_libraries(estimate_head_direction head_pose_estimation ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
+    add_executable(gazr_estimate_head_direction tools/estimate_head_direction.cpp)
+    target_link_libraries(gazr_estimate_head_direction gazr ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
 
-    add_executable(show_head_pose tools/show_head_pose.cpp)
-    target_link_libraries(show_head_pose head_pose_estimation ${OpenCV_LIBRARIES})
+    add_executable(gazr_show_head_pose tools/show_head_pose.cpp)
+    target_link_libraries(gazr_show_head_pose gazr ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
 
 endif()
 
