@@ -9,6 +9,9 @@ monocular camera (typically, a webcam).
 Currently, it only performs 6D head pose estimation. Eye orientation based on
 pupil tracking is being worked on.
 
+If you plan to use this library for academic purposes, we kindly request you to
+[cite our work](CITATION).
+
 Head pose estimation
 --------------------
 
@@ -31,7 +34,10 @@ support for other operating systems!
 ### Pre-requisites
 
 You need to [download](http://dlib.net/) and extract ``Dlib`` somewhere. This
-application requires ``dlib >= 18.18``.
+application requires ``dlib >= 18.18``. On Ubuntu 16.04 and above, `sudo
+apt-get install libdlib-dev`
+
+You also need OpenCV. On Ubuntu, `sudo apt-get install libopencv-dev`.
 
 ### Installation
 
@@ -63,4 +69,3 @@ Enable the compilation of the ROS wrapper with:
 ```
 cmake -DWITH_ROS=ON
 ```
-
