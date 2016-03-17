@@ -63,7 +63,10 @@ void HeadPoseEstimator::detectFaces(const sensor_msgs::ImageConstPtr& msg,
     auto poses = estimator.poses();
     ROS_INFO_STREAM(poses.size() << " faces detected.");
 
-    nb_detected_faces_pub.publish(poses.size());
+    std_msgs::Char nb_faces;
+    nb_faces.data = poses.size();
+
+    nb_detected_faces_pub.publish(nb_faces);
 
     for(size_t face_idx = 0; face_idx < poses.size(); ++face_idx) {
 
