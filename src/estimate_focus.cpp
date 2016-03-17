@@ -146,6 +146,8 @@ int main( int argc, char** argv )
 
     int nb_faces = 0;
 
+    std_msgs::String frames_in_fov;
+
     for(auto frame : frames) {
         if(frame.find(HUMAN_FRAME_PREFIX) == 0) {
 
@@ -164,7 +166,8 @@ int main( int argc, char** argv )
                         ss << monitored_frames[i];
                     }
                 }
-                frames_in_fov_pub.publish(ss.str());
+                frames_in_fov.data = ss.str();
+                frames_in_fov_pub.publish(frames_in_fov);
 
                 fov.range = RANGE;
                 fov.header.stamp = ros::Time::now();
