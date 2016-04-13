@@ -75,8 +75,8 @@ if(WITH_ROS)
     )
 
     install(FILES
-        launch/attention_tracking.launch
-        launch/attention_tracking_gscam.launch
+        launch/gazr.launch
+        launch/gazr_gscam.launch
         calib/logitech-c920_640x360.ini
         share/shape_predictor_68_face_landmarks.dat
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
