@@ -3,23 +3,19 @@
 
 #include <opencv2/calib3d/calib3d.hpp>
 
-#include <opencv2/imgproc/imgproc.hpp>
 
 #ifdef HEAD_POSE_ESTIMATION_DEBUG
+#include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #endif
 
 #include "head_pose_estimation.hpp"
 #include "face_reconstruction.hpp"
-#include "find_eye_center.hpp"
-
-const float EYE_ROI_ENLARGE_FACTOR = 25; // (percentage of the detected eye width)
 
 using namespace dlib;
 using namespace std;
 using namespace cv;
-
 
 
 inline Point3f toPoint3f(const Vec4f coords)
@@ -73,91 +69,6 @@ HeadPoseEstimation::HeadPoseEstimation(const string& face_detection_model, float
 
 }
 
-
-tuple<std::array<Point, 6>, Rect, std::array<Point, 6>, Rect> HeadPoseEstimation::eyesROI(const full_object_detection& face) const
-{
-    // Left eye
-    Rect leye_roi(Point2f(toCv(face.part(36)).x, min(toCv(face.part(37)).y,
-                                                     toCv(face.part(38)).y)),
-                  Point2f(toCv(face.part(39)).x, max(toCv(face.part(40)).y,
-                                                     toCv(face.part(41)).y)));
-
-    auto lmargin = EYE_ROI_ENLARGE_FACTOR/100 * leye_roi.width;
-
-    leye_roi.x -= lmargin; leye_roi.y -= lmargin;
-    leye_roi.width += 2 * lmargin; leye_roi.height += 2 * lmargin;
-
-    std::array<Point, 6> leye = {toCvI(face.part(36)) - leye_roi.tl(),
-                                 toCvI(face.part(37)) - leye_roi.tl(),
-                                 toCvI(face.part(38)) - leye_roi.tl(),
-                                 toCvI(face.part(39)) - leye_roi.tl(),
-                                 toCvI(face.part(40)) - leye_roi.tl(),
-                                 toCvI(face.part(41)) - leye_roi.tl()
-                                };
-
-    // Right eye
-    Rect reye_roi(Point2f(toCv(face.part(42)).x, min(toCv(face.part(43)).y,
-                                                     toCv(face.part(44)).y)),
-                  Point2f(toCv(face.part(45)).x, max(toCv(face.part(46)).y,
-                                                     toCv(face.part(47)).y)));
-
-    auto rmargin = EYE_ROI_ENLARGE_FACTOR/100 * leye_roi.width;
-
-    reye_roi.x -= rmargin; reye_roi.y -= rmargin;
-    reye_roi.width += 2 * rmargin; reye_roi.height += 2 * rmargin;
-
-    std::array<Point, 6> reye = {toCvI(face.part(42)) - reye_roi.tl(),
-                                 toCvI(face.part(43)) - reye_roi.tl(),
-                                 toCvI(face.part(44)) - reye_roi.tl(),
-                                 toCvI(face.part(45)) - reye_roi.tl(),
-                                 toCvI(face.part(46)) - reye_roi.tl(),
-                                 toCvI(face.part(47)) - reye_roi.tl()
-                                };
-
-    return make_tuple(leye, leye_roi, reye, reye_roi);
-}
-
-pair<Point2f, Point2f>
-HeadPoseEstimation::pupilsRelativePose(cv::InputArray _image,
-                                       const full_object_detection& face) const
-{
-    Mat image = _image.getMat();
-
-    std::array<Point, 6> left_eye, right_eye;
-    Rect left_eye_roi, right_eye_roi;
-
-    tie(left_eye, left_eye_roi, right_eye, right_eye_roi) = eyesROI(face);
-
-    // Create masks for the left and right eyes
-    Mat left_mask = Mat::zeros(left_eye_roi.size(), CV_8UC1);
-    fillConvexPoly(left_mask, left_eye.data(), left_eye.size(), Scalar(255,255,255));
-
-    Mat right_mask = Mat::zeros(right_eye_roi.size(), CV_8UC1);
-    fillConvexPoly(right_mask, right_eye.data(), right_eye.size(), Scalar(255,255,255));
-
-    auto left_pupil = findEyeCenter(image, left_eye_roi, left_mask);
-    auto right_pupil = findEyeCenter(image, right_eye_roi, right_mask);
-
-#ifdef HEAD_POSE_ESTIMATION_DEBUG
-    circle(_debug, Point(left_pupil.x, left_pupil.y) + left_eye_roi.tl(), 1, Scalar(0,0,255), 1);
-    circle(_debug, Point(right_pupil.x, right_pupil.y) + right_eye_roi.tl(), 4, Scalar(0,0,255), 2);
-
-    Mat left_eye_debug;
-    resize(_debug(left_eye_roi), left_eye_debug, Size(0,0), 10, 10);
-    imshow("left eye", left_eye_debug);
-#endif
-    Point2f left_center = left_eye_roi.br() - left_eye_roi.tl();
-    Point2f left_pupil_relative = left_pupil - left_center * 0.5;
-    left_pupil_relative.x /= left_eye_roi.width/2;
-    left_pupil_relative.y /= left_eye_roi.height/2;
-
-    Point2f right_center = right_eye_roi.br() - right_eye_roi.tl();
-    Point2f right_pupil_relative = right_pupil - right_center * 0.5;
-    right_pupil_relative.x /= right_eye_roi.width/2;
-    right_pupil_relative.y /= right_eye_roi.height/2;
-
-    return make_pair(left_pupil_relative, right_pupil_relative);
-}
 
 void HeadPoseEstimation::update(cv::InputArray _image)
 {
@@ -233,14 +144,12 @@ void HeadPoseEstimation::update(cv::InputArray _image)
 //        }
         
         FaceReconstruction::reconstruct(image, d, reconstructed_face);
+
+        Point2f left_pupil, right_pupil;
+        tie(left_pupil, right_pupil) = pupils_detector.findRelativePose(reconstructed_face);
     }
 
 #endif
-
-    for (const auto& shape :shapes) {
-        Point2f left_pupil, right_pupil;
-        tie(left_pupil, right_pupil) = pupilsRelativePose(image, shape);
-    }
 
 }
 
@@ -391,30 +300,6 @@ head_pose HeadPoseEstimation::pose(size_t face_idx) const
     // and P = P0 + t.V
     //
     // In our case, d = 0, N = [0,0,1]
-
-    auto P0 = toVec3d(pose.col(3)); // translation component of the pose
-    auto V = toVec3d(pose * Vec4d(1,0,0,1)) - P0;
-    normalize(V,V);
-    auto N = Vec3d(0,0,1);
-
-    auto t = - (P0.dot(N)) / (V.dot(N));
-
-    auto P = P0 + t * V;
-
-    cout << endl << "Origin of the gaze: " << P0 << endl;
-    cout << "Gaze vector: " << V << endl;
-    cout << "Position of the gaze on the screen: " << P << endl;
-
-    axes.clear();
-    axes.push_back(Point3d(V * 0.1 + P0));
-    axes.push_back(Point3d(Vec3d(P0)));
-
-    projectPoints(axes, Vec3f(0.,0.,0.), Vec3f(0.,0.,0.), projection, noArray(), projected_axes);
-
-    line(_debug, projected_axes[0], projected_axes[1], Scalar(255,255,255),2,CV_AA);
-
-
-
 
     auto P0 = toVec3d(pose.col(3)); // translation component of the pose
     auto V = toVec3d(pose * Vec4d(1,0,0,1)) - P0;
