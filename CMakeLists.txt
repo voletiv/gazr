@@ -58,7 +58,9 @@ endif()
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-add_library(gazr SHARED src/head_pose_estimation.cpp)
+add_library(gazr SHARED 
+            src/head_pose_estimation.cpp 
+            src/face_reconstruction.cpp)
 target_link_libraries(gazr ${dlib_LIBRARIES} ${OpenCV_LIBRARIES})
 
 if(WITH_ROS)
