@@ -140,12 +140,17 @@ head_pose HeadPoseEstimation::pose(size_t face_idx) const
     auto stomion = (coordsOf(face_idx, MOUTH_CENTER_TOP) + coordsOf(face_idx, MOUTH_CENTER_BOTTOM)) * 0.5;
     detected_points.push_back(stomion);
 
-    Mat rvec, tvec;
+
+    // Initializing the head pose 1m away, roughly facing the robot
+    // This initialization is important as it prevents solvePnP to find the
+    // mirror solution (head *behind* the camera)
+    Mat tvec = (Mat_<double>(3,1) << 0., 0., 1000.);
+    Mat rvec = (Mat_<double>(3,1) << 1.2, 1.2, -1.2);
 
     // Find the 3D pose of our head
     solvePnP(head_points, detected_points,
             projection, noArray(),
-            rvec, tvec, false,
+            rvec, tvec, true,
 #ifdef OPENCV3
             cv::SOLVEPNP_ITERATIVE);
 #else

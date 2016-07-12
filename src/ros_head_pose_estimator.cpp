@@ -15,8 +15,7 @@ HeadPoseEstimator::HeadPoseEstimator(ros::NodeHandle& rosNode,
             rosNode(rosNode),
             it(rosNode),
             warnUncalibratedImage(true),
-            estimator(modelFilename),
-            minr(0), miny(0), minp(0)
+            estimator(modelFilename)
 
 {
     sub = it.subscribeCamera("image", 1, &HeadPoseEstimator::detectFaces, this);
@@ -73,17 +72,10 @@ void HeadPoseEstimator::detectFaces(const sensor_msgs::ImageConstPtr& msg,
         auto trans = poses[face_idx];
 
         tf::Transform face_pose;
-        
-        // Frame orientation of the camera follows the classical camera
-        // convention (Z forward)
-
-        auto z = -trans(2,3);
-
-        if (z < 0) continue; // the head can not be *behind* the camera!
 
         face_pose.setOrigin( tf::Vector3( trans(0,3),
                                           trans(1,3),
-                                          z) );
+                                          trans(2,3)) );
 
         tf::Quaternion qrot;
         tf::Matrix3x3 mrot(
@@ -93,24 +85,26 @@ void HeadPoseEstimator::detectFaces(const sensor_msgs::ImageConstPtr& msg,
         mrot.getRotation(qrot);
         face_pose.setRotation(qrot);
 
-                tf::StampedTransform transform(face_pose, 
-                                     ros::Time::now() + ros::Duration(TRANSFORM_FUTURE_DATING), 
-                                     cameramodel.tfFrame(),
-                                     "face_" + to_string(face_idx));
-                br.sendTransform(transform);
+        tf::StampedTransform transform(face_pose, 
+                ros::Time::now() + ros::Duration(TRANSFORM_FUTURE_DATING), 
+                cameramodel.tfFrame(),
+                "face_" + to_string(face_idx));
+        br.sendTransform(transform);
 
 //    tf::TransformListener tf;
 //    tf.waitForTransform("face_0", "head_tracking_camera", ros::Time(), ros::Duration(1.0));
 //    tf::StampedTransform echo_transform;
 //    tf.lookupTransform("face_0", "head_tracking_camera", ros::Time(), echo_transform);
-    double yaw, pitch, roll;
-    transform.getBasis().getRPY(roll, pitch, yaw);
-    minp = max(minp, abs(pitch));
-    minr = max(minr, abs(roll));
-    miny = max(miny, abs(yaw));
-    ROS_INFO_STREAM("Rotation in RPY (degree) [" <<  roll*180.0/M_PI << ", " << pitch*180.0/M_PI << ", " << yaw*180.0/M_PI << "]" << std::endl);
-    ROS_INFO_STREAM("Max Rotation in RPY (degree) [" <<  minr*180.0/M_PI << ", " << minp*180.0/M_PI << ", " << miny*180.0/M_PI << "]" << std::endl);
 
+//        // Code to compute yaw-picth-roll
+//        double yaw, pitch, roll;
+//        transform.getBasis().getRPY(roll, pitch, yaw);
+//        minp = max(minp, abs(pitch));
+//        minr = max(minr, abs(roll));
+//        miny = max(miny, abs(yaw));
+//        ROS_DEBUG_STREAM("Rotation in RPY (degree) [" <<  roll*180.0/M_PI << ", " << pitch*180.0/M_PI << ", " << yaw*180.0/M_PI << "]" << std::endl);
+//        ROS_DEBUG_STREAM("Max Rotation in RPY (degree) [" <<  minr*180.0/M_PI << ", " << minp*180.0/M_PI << ", " << miny*180.0/M_PI << "]" << std::endl);
+//
     }
 
 #ifdef HEAD_POSE_ESTIMATION_DEBUG
