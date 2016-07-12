@@ -1,7 +1,5 @@
 <launch>
 
-  <arg name="head_tracking_frame" default="head_tracking_camera"/>
-
   <arg name="image" default="/camera/rgb/image_raw"/>
 
   <node pkg="gazr" type="estimate_focus" name="estimate_focus" />
