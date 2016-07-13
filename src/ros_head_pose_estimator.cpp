@@ -51,7 +51,10 @@ void HeadPoseEstimator::detectFaces(const sensor_msgs::ImageConstPtr& msg,
     // hopefully no copy here:
     //  - assignement operator of cv::Mat does not copy the data
     //  - toCvShare does no copy if the default (source) encoding is used.
-    inputImage = cv_bridge::toCvShare(msg)->image; 
+    Mat inputImage = cv_bridge::toCvShare(msg)->image;
+
+    // got an empty image!
+    if (inputImage.size().area() == 0) return;
 
     /********************************************************************
     *                      Faces detection                           *
