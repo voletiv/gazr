@@ -12,9 +12,6 @@
 #include <tf/transform_broadcaster.h>
 #include <image_transport/image_transport.h>
 
-#ifdef OPENCV3
-#define CV_INTER_LINEAR 1
-#endif
 #include <image_geometry/pinhole_camera_model.h>
 
 #include <cv_bridge/cv_bridge.h>
