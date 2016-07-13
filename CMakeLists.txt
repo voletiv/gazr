@@ -8,7 +8,7 @@ include_directories(${dlib_INCLUDE_DIRS})
 
 option(DEBUG "Enable debug visualizations" ON)
 option(WITH_TOOLS "Compile sample tools" ON)
-option(WITH_ROS "Build ROS nodes -- Requires OpenCV2!" OFF)
+option(WITH_ROS "Build ROS nodes" OFF)
 
 if(WITH_ROS)
 
@@ -57,10 +57,6 @@ add_library(gazr SHARED src/head_pose_estimation.cpp)
 target_link_libraries(gazr ${dlib_LIBRARIES} ${OpenCV_LIBRARIES})
 
 if(WITH_ROS)
-
-    if(OPENCV3)
-        message(FATAL_ERROR "OpenCV2 is currently required to build the ROS nodes!")
-    endif()
 
     add_executable(estimate_focus src/estimate_focus.cpp)
     target_link_libraries(estimate_focus ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
