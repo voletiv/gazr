@@ -49,7 +49,7 @@ $ cmake ..
 $ make
 ```
 
-Run ``head_pose_test ../share/shape_predictor_68_face_landmarks.dat`` to test
+Run ``./gazr_show_head_pose ../share/shape_predictor_68_face_landmarks.dat`` to test
 the library. You should get something very similar to the picture above.
 
 Finally, to install the library:
