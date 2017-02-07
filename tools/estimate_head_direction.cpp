@@ -1,9 +1,4 @@
-#ifdef OPENCV3
-#include <opencv2/imgcodecs.hpp>
-#else
-#include <opencv2/highgui/highgui.hpp>
-#endif
-#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/opencv.hpp>
 
 #include <iostream>
 #include <iomanip>
