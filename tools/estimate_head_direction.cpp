@@ -9,6 +9,9 @@
 
 #include "../src/head_pose_estimation.hpp"
 
+#define STR_EXPAND(tok) #tok
+#define STR(tok) STR_EXPAND(tok)
+
 using namespace std;
 using namespace cv;
 namespace po = boost::program_options;
@@ -30,6 +33,7 @@ int main(int argc, char **argv)
     po::options_description desc("Allowed options");
     desc.add_options()
             ("help,h", "produce help message")
+            ("version,v", "shows version and exits")
             ("show,s", "display the image with gaze estimation")
             ("model", po::value<string>(), "dlib's trained face model")
             ("image", po::value<string>(), "image to process (png, jpg)")
@@ -43,8 +47,13 @@ int main(int argc, char **argv)
     po::notify(vm);
 
     if (vm.count("help")) {
-        cout << "estimate_gaze_direction\n\n" << desc << "\n";
+        cout << argv[0] << " " <<  STR(GAZR_VERSION) << "\n\n" << desc << "\n";
         return 1;
+    }
+
+    if (vm.count("version")) {
+        cout << argv[0] << " " << STR(GAZR_VERSION) << "\n";
+        return 0;
     }
 
     if (vm.count("show")) {

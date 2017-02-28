@@ -1,3 +1,6 @@
+#define STR_EXPAND(tok) #tok
+#define STR(tok) STR_EXPAND(tok)
+
 #ifdef OPENCV3
 #include <opencv2/imgcodecs.hpp>
 #else
@@ -18,8 +21,8 @@ int main(int argc, char **argv)
     Mat frame;
 
     if(argc < 3) {
-        cerr << "Usage: " << endl <<
-                "head_pose model.dat frame.{jpg|png}" << endl;
+        cerr << argv[0] << " " << STR(GAZR_VERSION) << "\n\nUsage: " 
+             << endl << argv[0] << " model.dat frame.{jpg|png}" << endl;
 #ifdef HEAD_POSE_ESTIMATION_DEBUG
         cerr <<  "Output: a new frame 'head_pose_<frame>.png'" << endl;
 #endif
