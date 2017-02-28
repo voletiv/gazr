@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(gazr)
 
-add_definitions(-std=c++11)
+set(CPACK_PACKAGE_VERSION_MAJOR "1")
+set(CPACK_PACKAGE_VERSION_MINOR "0")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH})
+
+add_definitions(-std=c++11 -DGAZR_VERSION=${VERSION})
 
 find_package(dlib REQUIRED)
 include_directories(${dlib_INCLUDE_DIRS})

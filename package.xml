@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>gazr</name>
-  <version>0.1.0</version>
+  <version>1.0.0</version>
   <description>Assess in real time the user's attention focus to compute a level of engagement</description>
 
   <maintainer email="severin.lemaignan@plymouth.ac.uk">Séverin Lemaignan</maintainer>
