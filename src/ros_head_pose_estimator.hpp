@@ -22,6 +22,7 @@ class HeadPoseEstimator
 public:
 
     HeadPoseEstimator(ros::NodeHandle& rosNode,
+                      const std::string& prefix,
                       const std::string& modelFilename = "");
 
 private:
@@ -41,6 +42,9 @@ private:
 
     cv::Mat inputImage;
     HeadPoseEstimation estimator;
+
+    // prefix prepended to TF frames generated for each frame
+    std::string facePrefix;
 
     bool warnUncalibratedImage;
 

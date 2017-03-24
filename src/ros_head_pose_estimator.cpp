@@ -11,10 +11,12 @@ using namespace cv;
 #define TRANSFORM_FUTURE_DATING 0
 
 HeadPoseEstimator::HeadPoseEstimator(ros::NodeHandle& rosNode,
-                                     const string& modelFilename) :
+                                     const string& modelFilename,
+                                     const string& prefix) :
             rosNode(rosNode),
             it(rosNode),
             warnUncalibratedImage(true),
+            facePrefix(prefix),
             estimator(modelFilename)
 
 {
@@ -30,6 +32,8 @@ HeadPoseEstimator::HeadPoseEstimator(ros::NodeHandle& rosNode,
 void HeadPoseEstimator::detectFaces(const sensor_msgs::ImageConstPtr& msg, 
                                     const sensor_msgs::CameraInfoConstPtr& camerainfo)
 {
+    ROS_INFO_ONCE("First image received");
+
     // updating the camera model is cheap if not modified
     cameramodel.fromCameraInfo(camerainfo);
     // publishing uncalibrated images? -> return (according to CameraInfo message documentation,
@@ -91,7 +95,7 @@ void HeadPoseEstimator::detectFaces(const sensor_msgs::ImageConstPtr& msg,
         tf::StampedTransform transform(face_pose, 
                 ros::Time::now() + ros::Duration(TRANSFORM_FUTURE_DATING), 
                 cameramodel.tfFrame(),
-                "face_" + to_string(face_idx));
+                facePrefix + "_" + to_string(face_idx));
         br.sendTransform(transform);
 
 //    tf::TransformListener tf;
