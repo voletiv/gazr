@@ -82,6 +82,12 @@ if(WITH_ROS)
         share/shape_predictor_68_face_landmarks.dat
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
     )
+
+    install(FILES
+        src/head_pose_estimation.hpp
+        src/ros_head_pose_estimator.hpp
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+    )
 endif()
 
 if(WITH_TOOLS)
