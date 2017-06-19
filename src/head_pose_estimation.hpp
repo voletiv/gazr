@@ -55,7 +55,10 @@ public:
 
     HeadPoseEstimation(const std::string& face_detection_model = "shape_predictor_68_face_landmarks.dat", float focalLength=455.);
 
-    void update(cv::InputArray image);
+    /** Returns the 2D position (in image coordinates) of the 68 facial features
+     * detected by dlib (or an empty vector if no face is detected).
+     */
+    std::vector<cv::Point> update(cv::InputArray image);
 
     head_pose pose(size_t face_idx) const;
 

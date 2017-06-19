@@ -1,6 +1,8 @@
 #include <cmath>
 #include <ctime>
 
+#include <ros/ros.h>
+
 #include <opencv2/calib3d/calib3d.hpp>
 
 #ifdef HEAD_POSE_ESTIMATION_DEBUG
@@ -14,9 +16,9 @@ using namespace dlib;
 using namespace std;
 using namespace cv;
 
-inline Point2f toCv(const dlib::point& p)
+inline Point toCv(const dlib::point& p)
 {
-    return Point2f(p.x(), p.y());
+    return Point(p.x(), p.y());
 }
 
 
@@ -33,7 +35,7 @@ HeadPoseEstimation::HeadPoseEstimation(const string& face_detection_model, float
 }
 
 
-void HeadPoseEstimation::update(cv::InputArray _image)
+std::vector<Point> HeadPoseEstimation::update(cv::InputArray _image)
 {
 
     Mat image = _image.getMat();
@@ -57,6 +59,20 @@ void HeadPoseEstimation::update(cv::InputArray _image)
         shapes.push_back(pose_model(current_image, face));
     }
 
+    std::vector<Point> features;
+
+    if (shapes.size() > 0) {
+        if (shapes.size() > 1) ROS_WARN("More that one face detected! Processing only the first one");
+
+        const full_object_detection& d = shapes[0];
+
+        for (size_t i = 0; i < 68; ++i)
+        {
+            features.push_back(toCv(d.part(i)));
+        }
+    }
+
+
 #ifdef HEAD_POSE_ESTIMATION_DEBUG
     // Draws the contours of the face and face features onto the image
     
@@ -64,45 +80,47 @@ void HeadPoseEstimation::update(cv::InputArray _image)
 
     auto color = Scalar(0,128,128);
 
-    for (unsigned long i = 0; i < shapes.size(); ++i)
+    for (size_t j = 0; j < shapes.size(); ++j)
     {
-        const full_object_detection& d = shapes[i];
+        const full_object_detection& d = shapes[j];
 
-        for (unsigned long i = 1; i <= 16; ++i)
-            line(_debug, toCv(d.part(i)), toCv(d.part(i-1)), color, 2, CV_AA);
-
-        for (unsigned long i = 28; i <= 30; ++i)
+        for (size_t i = 1; i <= 16; ++i)
             line(_debug, toCv(d.part(i)), toCv(d.part(i-1)), color, 2, CV_AA);
 
-        for (unsigned long i = 18; i <= 21; ++i)
+        for (size_t i = 28; i <= 30; ++i)
             line(_debug, toCv(d.part(i)), toCv(d.part(i-1)), color, 2, CV_AA);
-        for (unsigned long i = 23; i <= 26; ++i)
+
+        for (size_t i = 18; i <= 21; ++i)
             line(_debug, toCv(d.part(i)), toCv(d.part(i-1)), color, 2, CV_AA);
-        for (unsigned long i = 31; i <= 35; ++i)
+        for (size_t i = 23; i <= 26; ++i)
+            line(_debug, toCv(d.part(i)), toCv(d.part(i-1)), color, 2, CV_AA);
+        for (size_t i = 31; i <= 35; ++i)
             line(_debug, toCv(d.part(i)), toCv(d.part(i-1)), color, 2, CV_AA);
         line(_debug, toCv(d.part(30)), toCv(d.part(35)), color, 2, CV_AA);
 
-        for (unsigned long i = 37; i <= 41; ++i)
+        for (size_t i = 37; i <= 41; ++i)
             line(_debug, toCv(d.part(i)), toCv(d.part(i-1)), color, 2, CV_AA);
         line(_debug, toCv(d.part(36)), toCv(d.part(41)), color, 2, CV_AA);
 
-        for (unsigned long i = 43; i <= 47; ++i)
+        for (size_t i = 43; i <= 47; ++i)
             line(_debug, toCv(d.part(i)), toCv(d.part(i-1)), color, 2, CV_AA);
         line(_debug, toCv(d.part(42)), toCv(d.part(47)), color, 2, CV_AA);
 
-        for (unsigned long i = 49; i <= 59; ++i)
+        for (size_t i = 49; i <= 59; ++i)
             line(_debug, toCv(d.part(i)), toCv(d.part(i-1)), color, 2, CV_AA);
         line(_debug, toCv(d.part(48)), toCv(d.part(59)), color, 2, CV_AA);
 
-        for (unsigned long i = 61; i <= 67; ++i)
+        for (size_t i = 61; i <= 67; ++i)
             line(_debug, toCv(d.part(i)), toCv(d.part(i-1)), color, 2, CV_AA);
         line(_debug, toCv(d.part(60)), toCv(d.part(67)), color, 2, CV_AA);
 
-        for (auto i = 0; i < 68 ; i++) {
+        for (size_t i = 0; i < 68 ; i++) {
             putText(_debug, to_string(i), toCv(d.part(i)), FONT_HERSHEY_DUPLEX, 0.6, Scalar(255,255,255));
         }
     }
 #endif
+
+    return features;
 }
 
 head_pose HeadPoseEstimation::pose(size_t face_idx) const
