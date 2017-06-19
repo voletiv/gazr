@@ -2,13 +2,14 @@
 #include <ros/ros.h>
 
 #include "ros_head_pose_estimator.hpp"
+#include "facialfeaturescloud.hpp"
 
 using namespace std;
 
 int main(int argc, char* argv[])
 {
     //ROS initialization
-    ros::init(argc, argv, "ros_attention_tracker");
+    ros::init(argc, argv, "ros_faces");
     ros::NodeHandle rosNode;
     ros::NodeHandle _private_node("~");
 
@@ -27,7 +28,7 @@ int main(int argc, char* argv[])
     // initialize the detector by subscribing to the camera video stream
     ROS_INFO_STREAM("Initializing the face detector with the model " << modelFilename <<"...");
     HeadPoseEstimator estimator(rosNode, modelFilename, prefix);
-    ROS_INFO("head_pose_estimator is ready. TF frames of detected faces will be published when detected.");
+    ROS_INFO("ros_faces is ready. TF frames of detected faces will be published when detected.");
     ros::spin();
 
     return 0;

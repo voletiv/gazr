@@ -67,7 +67,7 @@ if(WITH_ROS)
     add_executable(estimate_focus src/estimate_focus.cpp)
     target_link_libraries(estimate_focus ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
-    add_executable(estimate src/head_pose_estimation_ros.cpp src/ros_head_pose_estimator.cpp)
+    add_executable(estimate src/main.cpp src/ros_head_pose_estimator.cpp src/facialfeaturescloud.cpp)
     target_link_libraries(estimate gazr ${catkin_LIBRARIES})
 
     install(TARGETS estimate_focus gazr estimate
