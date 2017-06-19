@@ -11,16 +11,15 @@ using namespace cv;
 #define TRANSFORM_FUTURE_DATING 0
 
 HeadPoseEstimator::HeadPoseEstimator(ros::NodeHandle& rosNode,
-                                     const string& modelFilename,
-                                     const string& prefix) :
+                                     const string& prefix,
+                                     const string& modelFilename):
             rosNode(rosNode),
             it(rosNode),
-            warnUncalibratedImage(true),
             facePrefix(prefix),
             estimator(modelFilename)
 
 {
-    sub = it.subscribeCamera("image", 1, &HeadPoseEstimator::detectFaces, this);
+    sub = it.subscribeCamera("rgb", 1, &HeadPoseEstimator::detectFaces, this);
 
     nb_detected_faces_pub = rosNode.advertise<std_msgs::Char>("nb_detected_faces", 1);
 
@@ -29,25 +28,14 @@ HeadPoseEstimator::HeadPoseEstimator(ros::NodeHandle& rosNode,
 #endif
 }
 
-void HeadPoseEstimator::detectFaces(const sensor_msgs::ImageConstPtr& msg, 
+void HeadPoseEstimator::detectFaces(const sensor_msgs::ImageConstPtr& rgb_msg, 
                                     const sensor_msgs::CameraInfoConstPtr& camerainfo)
 {
-    ROS_INFO_ONCE("First image received");
+    ROS_INFO_ONCE("First RGB image received");
 
     // updating the camera model is cheap if not modified
     cameramodel.fromCameraInfo(camerainfo);
-    // publishing uncalibrated images? -> return (according to CameraInfo message documentation,
-    // K[0] == 0.0 <=> uncalibrated).
-    if(cameramodel.intrinsicMatrix()(0,0) == 0.0) {
-        if(warnUncalibratedImage) {
-            warnUncalibratedImage = false;
-            ROS_ERROR("Camera publishes uncalibrated images. Can not estimate face position.");
-            ROS_WARN("Detection will start over again when camera info is available.");
-        }
-        return;
-    }
-    warnUncalibratedImage = true;
-    
+
     estimator.focalLength = cameramodel.fx(); 
     estimator.opticalCenterX = cameramodel.cx();
     estimator.opticalCenterY = cameramodel.cy();
@@ -55,16 +43,16 @@ void HeadPoseEstimator::detectFaces(const sensor_msgs::ImageConstPtr& msg,
     // hopefully no copy here:
     //  - assignement operator of cv::Mat does not copy the data
     //  - toCvShare does no copy if the default (source) encoding is used.
-    Mat inputImage = cv_bridge::toCvShare(msg)->image;
+    auto rgb = cv_bridge::toCvShare(rgb_msg, "bgr8")->image; 
 
     // got an empty image!
-    if (inputImage.size().area() == 0) return;
+    if (rgb.size().area() == 0) return;
 
     /********************************************************************
     *                      Faces detection                           *
     ********************************************************************/
 
-    estimator.update(inputImage);
+    estimator.update(rgb);
 
     auto poses = estimator.poses();
     ROS_INFO_STREAM(poses.size() << " faces detected.");
@@ -93,7 +81,7 @@ void HeadPoseEstimator::detectFaces(const sensor_msgs::ImageConstPtr& msg,
         face_pose.setRotation(qrot);
 
         tf::StampedTransform transform(face_pose, 
-                ros::Time::now() + ros::Duration(TRANSFORM_FUTURE_DATING), 
+                rgb_msg->header.stamp,  // publish the transform with the same timestamp as the frame originally used
                 cameramodel.tfFrame(),
                 facePrefix + "_" + to_string(face_idx));
         br.sendTransform(transform);

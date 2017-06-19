@@ -27,11 +27,9 @@ HeadPoseEstimation::HeadPoseEstimation(const string& face_detection_model, float
         opticalCenterX(-1),
         opticalCenterY(-1)
 {
-
-        // Load face detection and pose estimation models.
-        detector = get_frontal_face_detector();
-        deserialize(face_detection_model) >> pose_model;
-
+    // Load face detection and pose estimation models.
+    detector = get_frontal_face_detector();
+    deserialize(face_detection_model) >> pose_model;
 }
 
 
@@ -62,7 +60,7 @@ std::vector<Point> HeadPoseEstimation::update(cv::InputArray _image)
     std::vector<Point> features;
 
     if (shapes.size() > 0) {
-        if (shapes.size() > 1) ROS_WARN("More that one face detected! Processing only the first one");
+        if (shapes.size() > 1) ROS_WARN("More that one face detected! Returning facial features for the first one only");
 
         const full_object_detection& d = shapes[0];
 

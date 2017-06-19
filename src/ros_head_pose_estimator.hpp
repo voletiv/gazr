@@ -46,8 +46,6 @@ private:
     // prefix prepended to TF frames generated for each frame
     std::string facePrefix;
 
-    bool warnUncalibratedImage;
-
     void detectFaces(const sensor_msgs::ImageConstPtr& msg,
                      const sensor_msgs::CameraInfoConstPtr& camerainfo);
 };

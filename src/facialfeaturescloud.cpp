@@ -3,6 +3,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #endif
 
+#include <std_msgs/Char.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
 #include <cv_bridge/cv_bridge.h>
 
@@ -17,9 +18,11 @@ using namespace cv;
 namespace enc = sensor_msgs::image_encodings;
 
 FacialFeaturesPointCloudPublisher::FacialFeaturesPointCloudPublisher(ros::NodeHandle& rosNode,
+                                                                     const std::string& prefix,
                                                                      const std::string& model):
     rosNode(rosNode),
-    estimator(model)
+    estimator(model),
+    facePrefix(prefix)
 {
 
     /// Subscribing
@@ -183,14 +186,16 @@ void FacialFeaturesPointCloudPublisher::imageCb(const sensor_msgs::ImageConstPtr
 
     facial_features_pub.publish(cloud_msg);
 
-    /*
-    auto poses = estimator->poses();
+    
+    auto poses = estimator.poses();
     ROS_INFO_STREAM(poses.size() << " faces detected.");
 
-    string faceFrame = "face_sellion";
+    std_msgs::Char nb_faces;
+    nb_faces.data = poses.size();
 
-    if (poses.size() > 0) {
-        size_t face_idx = 0;
+    nb_detected_faces_pub.publish(nb_faces);
+
+    for(size_t face_idx = 0; face_idx < poses.size(); ++face_idx) {
 
         auto trans = poses[face_idx];
 
@@ -211,15 +216,17 @@ void FacialFeaturesPointCloudPublisher::imageCb(const sensor_msgs::ImageConstPtr
         tf::StampedTransform transform(face_pose, 
                 rgb_msg->header.stamp,  // publish the transform with the same timestamp as the frame originally used
                 cameramodel.tfFrame(),
-                faceFrame);
+                facePrefix + "_" + to_string(face_idx));
         br.sendTransform(transform);
 
     }
-    */
 
 #ifdef HEAD_POSE_ESTIMATION_DEBUG
-    imshow("2D face features", estimator->_debug);
-    waitKey(10);
+    if(pub.getNumSubscribers() > 0) {
+        ROS_INFO_ONCE("Starting to publish face tracking output for debug");
+        auto debugmsg = cv_bridge::CvImage(msg->header, "bgr8", estimator._debug).toImageMsg();
+        pub.publish(debugmsg);
+    }
 #endif
 }
 

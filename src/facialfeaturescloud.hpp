@@ -25,6 +25,7 @@ class FacialFeaturesPointCloudPublisher {
 
 public:
     FacialFeaturesPointCloudPublisher(ros::NodeHandle& rosNode,
+                                      const std::string& prefix,
                                       const std::string& model);
 
     void imageCb(const sensor_msgs::ImageConstPtr& rgb_msg,
@@ -44,9 +45,10 @@ private:
     cv::Mat inputImage;
     HeadPoseEstimation estimator;
 
-    std::shared_ptr<image_transport::ImageTransport> rgb_it_, depth_it_;
 
     // Subscriptions
+    /////////////////////////////////////////////////////////
+    std::shared_ptr<image_transport::ImageTransport> rgb_it_, depth_it_;
     image_transport::SubscriberFilter sub_depth_, sub_rgb_;
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_info_;
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::CameraInfo> SyncPolicy;
@@ -56,9 +58,18 @@ private:
     std::shared_ptr<Synchronizer> sync_;
     std::shared_ptr<ExactSynchronizer> exact_sync_;
 
+    // Publishers
+    /////////////////////////////////////////////////////////
+
+    // prefix prepended to TF frames generated for each frame
+    std::string facePrefix;
+
+    ros::Publisher nb_detected_faces_pub;
 
     ros::Publisher facial_features_pub;
+
     tf::TransformBroadcaster br;
+    tf::Transform transform;
 
 };
 
