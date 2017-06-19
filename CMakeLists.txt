@@ -30,12 +30,6 @@ if(WITH_ROS)
 
     include_directories(${catkin_INCLUDE_DIRS})
 
-    catkin_package(
-    CATKIN_DEPENDS 
-        tf
-    DEPENDS OpenCV
-    LIBRARIES 
-    )
 endif()
 
 if(DEBUG)
@@ -50,7 +44,14 @@ if(${OpenCV_VERSION} VERSION_GREATER 2.9.0)
     add_definitions(-DOPENCV3)
 endif()
 
-
+if(WITH_ROS)
+    catkin_package(
+        INCLUDE_DIRS src
+        CATKIN_DEPENDS tf
+        DEPENDS OpenCV
+        LIBRARIES gazr
+    )
+endif()
 
 if(DEBUG)
     add_definitions(-DHEAD_POSE_ESTIMATION_DEBUG)
