@@ -3,8 +3,11 @@ gazr
 
 ![Face tracking for head pose estimation](doc/screenshot.jpg)
 
-*gazr* is a library and a set of tools for real-time gaze estimation from a
-monocular camera (typically, a webcam).
+*gazr* is a library and a set of tools for real-time face tracking and gaze
+estimation from a monocular camera (typically, a webcam) or a RGB-D stream (3D
+camera).
+
+It natively supports [ROS](http://ros.org).
 
 Currently, it only performs 6D head pose estimation. Eye orientation based on
 pupil tracking is being worked on.
@@ -15,6 +18,7 @@ If you plan to use this library for academic purposes, we kindly request you to
 Head pose estimation
 --------------------
 
+
 This library (`libhead_pose_estimation.so`) performs 3D head pose estimation
 based on the fantastic [dlib](http://dlib.net/) face detector and a bit of
 [OpenCV's
@@ -23,7 +27,18 @@ solvePnP](http://docs.opencv.org/modules/calib3d/doc/camera_calibration_and_3d_r
 The library returns a 4x4 transformation matrix.
 
 It supports detection and tracking of multiple faces at the same time, and runs
-on-line, but it *does not* feature face identification.
+on-line, but it *does not* provide face identification/recognition.
+
+3D facial features extraction
+-----------------------------
+
+![3D facial features in ROS](doc/3d-point-cloud-facial-features.jpg)
+
+If provided with an RGB-D (color + depth) stream, the library can extract and
+compute the 3D localisation of 68 facial landmarks (cf screenshot above).
+
+*Note that this feature is currently only available for ROS.*
+
 
 Installation
 ------------
@@ -61,6 +76,8 @@ $ make install
 ROS support
 -----------
 
+### Installation
+
 The [ROS](http://www.ros.org/) wrapper provides a convenient node that exposes
 each detected face as a TF frame.
 
@@ -69,3 +86,30 @@ Enable the compilation of the ROS wrapper with:
 ```
 cmake -DWITH_ROS=ON
 ```
+
+### Usage
+
+Once installed with ROS support, you can launch `gazr` with a monocular RGB
+stream with:
+
+```
+$ roslaunch gazr gazr.launch
+```
+
+To process a depth stream as well, run:
+```
+$ roslaunch gazr gazr.launch with_depth:=true
+```
+
+The facial features are published as a `PointCloud2` message on the
+`/facial_features` topic.
+
+
+You can get the full list of arguments by typing:
+
+```
+$ roslaunch gazr gazr.launch --ros-args
+```
+
+Importantly, you might want to remap the `rgb` and `depth` topics to your liking.
+
