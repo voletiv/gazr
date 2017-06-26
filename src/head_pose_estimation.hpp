@@ -58,7 +58,7 @@ public:
     /** Returns the 2D position (in image coordinates) of the 68 facial features
      * detected by dlib (or an empty vector if no face is detected).
      */
-    std::vector<cv::Point> update(cv::InputArray image);
+    std::vector<std::vector<cv::Point>> update(cv::InputArray image);
 
     head_pose pose(size_t face_idx) const;
 

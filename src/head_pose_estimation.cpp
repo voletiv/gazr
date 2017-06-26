@@ -33,7 +33,7 @@ HeadPoseEstimation::HeadPoseEstimation(const string& face_detection_model, float
 }
 
 
-std::vector<Point> HeadPoseEstimation::update(cv::InputArray _image)
+std::vector<std::vector<Point>> HeadPoseEstimation::update(cv::InputArray _image)
 {
 
     Mat image = _image.getMat();
@@ -57,17 +57,19 @@ std::vector<Point> HeadPoseEstimation::update(cv::InputArray _image)
         shapes.push_back(pose_model(current_image, face));
     }
 
-    std::vector<Point> features;
+    std::vector<std::vector<Point>> all_features;
 
-    if (shapes.size() > 0) {
-        if (shapes.size() > 1) ROS_WARN("More that one face detected! Returning facial features for the first one only");
-
-        const full_object_detection& d = shapes[0];
+    for (size_t j = 0; j < shapes.size(); ++j)
+    {
+        std::vector<Point> features;
+        const full_object_detection& d = shapes[j];
 
         for (size_t i = 0; i < 68; ++i)
         {
             features.push_back(toCv(d.part(i)));
         }
+
+        all_features.push_back(features);
     }
 
 
@@ -118,7 +120,7 @@ std::vector<Point> HeadPoseEstimation::update(cv::InputArray _image)
     }
 #endif
 
-    return features;
+    return all_features;
 }
 
 head_pose HeadPoseEstimation::pose(size_t face_idx) const

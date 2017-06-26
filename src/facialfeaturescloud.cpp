@@ -160,7 +160,10 @@ void FacialFeaturesPointCloudPublisher::imageCb(const sensor_msgs::ImageConstPtr
     *                      Faces detection                           *
     ********************************************************************/
 
-    auto features = estimator.update(rgb);
+    auto all_features = estimator.update(rgb);
+    if(all_features.size() > 1) ROS_WARN("More than one face detected. 3D facial features computed for the first one only");
+
+    auto features = all_features[0];
 
     // Allocate new point cloud message
     PointCloud::Ptr cloud_msg (new PointCloud);
