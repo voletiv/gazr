@@ -11,7 +11,7 @@ add_definitions(-std=c++11 -DGAZR_VERSION=${VERSION})
 find_package(dlib REQUIRED)
 include_directories(${dlib_INCLUDE_DIRS})
 
-option(DEBUG "Enable debug visualizations" ON)
+option(DEBUG "Enable debug visualizations" OFF)
 option(WITH_TOOLS "Compile sample tools" ON)
 option(WITH_ROS "Build ROS nodes" OFF)
 
@@ -104,12 +104,7 @@ if(WITH_TOOLS)
     add_executable(gazr_benchmark_head_pose_single_frame tools/benchmark_head_pose_estimation_single_frame.cpp)
     target_link_libraries(gazr_benchmark_head_pose_single_frame gazr ${OpenCV_LIBRARIES})
 
-    add_executable(gazr_estimate_head_direction tools/estimate_head_direction.cpp)
-    target_link_libraries(gazr_estimate_head_direction gazr ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
-
-    add_executable(gazr_show_head_pose tools/show_head_pose.cpp)
-    target_link_libraries(gazr_show_head_pose gazr ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
+    add_executable(gazr_benchmark_head_pose_multiple_frames tools/benchmark_head_pose_estimation_multiple_frames.cpp)
+    target_link_libraries(gazr_benchmark_head_pose_multiple_frames gazr ${OpenCV_LIBRARIES})
 
 endif()
-
-
