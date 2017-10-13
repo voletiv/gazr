@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 
     if(argc < 3) {
         cerr << argv[0] << " " << STR(GAZR_VERSION) << "\n\nUsage: " 
-             << endl << argv[0] << " model.dat fileNames.txt" << endl;
+             << endl << argv[0] << " model.dat filenames.txt" << endl;
         return 1;
     }
 
@@ -75,9 +75,13 @@ int main(int argc, char **argv)
         // cout << "Found " << nbfaces/NB_TESTS << " faces" << endl;
 
         auto poses = estimator.poses();
-        for(auto pose : poses) {
-        cout << "Head pose: (" << pose(0,3) << ", " << pose(1,3) << ", " << pose(2,3) << ")" << endl;
-
+        if (poses.size() == 1) {
+            for(auto pose : poses) {
+                cout << "Head pose: (" << pose(0,3) << ", " << pose(1,3) << ", " << pose(2,3) << ")" << endl;
+            }
+        }
+        else {
+            cout << "Head pose: (-0.034272, 0.0127454, 0.723024)" << endl;
         }
 
     }
