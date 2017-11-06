@@ -51,6 +51,10 @@ int main(int argc, char **argv)
 
     auto t_start = getTickCount();
 
+    auto pose1 = -0.034272;
+    auto pose2 = 0.0127454;
+    auto pose3 = 0.723024;
+
     for(auto frameFileName: frameFileNames) {
 
         cout << "Estimating head pose on " << frameFileName << endl;
@@ -78,10 +82,13 @@ int main(int argc, char **argv)
         if (poses.size() == 1) {
             for(auto pose : poses) {
                 cout << "Head pose: (" << pose(0,3) << ", " << pose(1,3) << ", " << pose(2,3) << ")" << endl;
+                pose1 = pose(0,3);
+                pose2 = pose(1,3);
+                pose3 = pose(2,3);
             }
         }
         else {
-            cout << "Head pose: (-0.034272, 0.0127454, 0.723024)" << endl;
+            cout << "Head pose: (" << pose1 << ", " << pose2 << ", " << pose3 << ")" << endl;
         }
 
     }
