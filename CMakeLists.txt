@@ -103,11 +103,11 @@ if(WITH_TOOLS)
 
     add_executable(gazr_estimate_head_pose tools/estimate_head_pose_from_image_or_file.cpp)
     target_link_libraries(gazr_estimate_head_pose gazr ${OpenCV_LIBRARIES})
-
+#[[
     add_executable(gazr_estimate_head_direction tools/estimate_head_direction.cpp)
     target_link_libraries(gazr_estimate_head_direction gazr ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
 
     add_executable(gazr_show_head_pose tools/show_head_pose.cpp)
     target_link_libraries(gazr_show_head_pose gazr ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
-
+]]
 endif()
