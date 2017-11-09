@@ -118,7 +118,7 @@ int main(int argc, char **argv)
     auto t_start = getTickCount();
 
     // Single image file
-    if (fileName.find("jpg") != std::string::npos or fileName.find("png") != std::string::npos) {
+    if (fileName.find(".jpg") != std::string::npos or fileName.find(".png") != std::string::npos) {
         cout << ".jpg or .png file" << endl;
         estimate_head_pose_on_frameFileName(fileName, estimator, prev_poses, false);
     }
