@@ -107,4 +107,7 @@ if(WITH_TOOLS)
     add_executable(gazr_benchmark_head_pose_multiple_frames tools/benchmark_head_pose_estimation_multiple_frames.cpp)
     target_link_libraries(gazr_benchmark_head_pose_multiple_frames gazr ${OpenCV_LIBRARIES})
 
+    add_executable(gazr_estimate_head_pose tools/estimate_head_pose_from_image_or_file.cpp)
+    target_link_libraries(gazr_estimate_head_pose gazr ${OpenCV_LIBRARIES})
+
 endif()
