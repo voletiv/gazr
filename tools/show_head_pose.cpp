@@ -97,7 +97,9 @@ int main(int argc, char **argv)
         auto t_end = getTickCount();
         cout << "Processing time for this frame: " << (t_end-t_start) / getTickFrequency() * 1000. << "ms" << endl;
 
+#ifdef HEAD_POSE_ESTIMATION_DEBUG
         imshow("headpose", estimator._debug);
+#endif
         if (waitKey(10) >= 0) break;
 
     }

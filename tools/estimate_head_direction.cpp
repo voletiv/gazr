@@ -150,7 +150,9 @@ int main(int argc, char **argv)
         cout << "}\n" << flush;
 
         if (show_frame) {
+#ifdef HEAD_POSE_ESTIMATION_DEBUG
             imshow("headpose", estimator._debug);
+#endif
             if(use_camera) {
                 waitKey(10);
             }
