@@ -1,20 +1,29 @@
 #define STR_EXPAND(tok) #tok
 #define STR(tok) STR_EXPAND(tok)
 
+#include <opencv2/opencv.hpp>
+
 #ifdef OPENCV3
 #include <opencv2/imgcodecs.hpp>
 #else
 #include <opencv2/highgui/highgui.hpp>
 #endif
 
+#include <boost/program_options.hpp>
 #include <iostream>
+#include <iomanip>
 
+#include "LinearMath/Matrix3x3.h"
 #include "../src/head_pose_estimation.hpp"
 
 using namespace std;
 using namespace cv;
 
 const static size_t NB_TESTS = 1; // number of time the detection is run, to get better average detection duration
+
+inline double todeg(double rad) {
+    return rad * 180 / M_PI;
+}
 
 std::vector<std::string> readFileToVector(const std::string& filename)
 {
@@ -29,10 +38,37 @@ std::vector<std::string> readFileToVector(const std::string& filename)
     return lines;
 }
 
+void calculate_yaw_pitch_roll(head_pose& pose)
+{           
+    pose = pose.inv();
+
+    double raw_yaw, raw_pitch, raw_roll;
+    tf::Matrix3x3 mrot(
+            pose(0,0), pose(0,1), pose(0,2),
+            pose(1,0), pose(1,1), pose(1,2),
+            pose(2,0), pose(2,1), pose(2,2));
+    mrot.getRPY(raw_roll, raw_pitch, raw_yaw);
+
+    raw_roll = raw_roll - M_PI/2;
+    raw_yaw = raw_yaw + M_PI/2;
+
+    double yaw, pitch, roll;
+
+    roll = raw_pitch;
+    yaw = raw_yaw;
+    pitch = -raw_roll;
+
+    // cout << "\"face_" << i << "\":";
+    cout << setprecision(4) << fixed << "{\"yaw\":" << todeg(yaw) << ", \"pitch\":" << todeg(pitch) << ", \"roll\":" << todeg(roll) << ",";
+    cout << setprecision(4) << fixed << "\"x\":" << pose(0,3) << ", \"y\":" << pose(1,3) << ", \"z\":" << pose(2,3) << "},";
+
+    cout << ", " << pose(0,3) << ", " << pose(1,3) << ", " << pose(2,3);
+}
+
 
 void estimate_head_pose_on_frameFileName(const std::string& frameFileName, HeadPoseEstimation estimator, std::vector<head_pose>& prev_poses, bool print_prev_poses)
 {
-    cout << "Estimating head pose on " << frameFileName << endl;
+    cout << frameFileName;
 #ifdef OPENCV3
     Mat img = imread(frameFileName, IMREAD_COLOR);
 #else
@@ -56,20 +92,21 @@ void estimate_head_pose_on_frameFileName(const std::string& frameFileName, HeadP
 
     auto poses = estimator.poses();
     if (poses.size() > 0) {
+        
         for(auto pose : poses) {
-            cout << "Head pose: (" << pose(0,3) << ", " << pose(1,3) << ", " << pose(2,3) << ")" << endl;
+            calculate_yaw_pitch_roll(pose);
         }
+        
         prev_poses = poses;
+    
     }
     else if (print_prev_poses) {
         for(auto pose : prev_poses) {
-            cout << "Head pose: (" << pose(0,3) << ", " << pose(1,3) << ", " << pose(2,3) << ")" << endl;
+            calculate_yaw_pitch_roll(pose);
         }
     }
-    else {
-        cout << "Head pose not calculated!" << endl;
-    }
-
+    
+    cout << endl;
 }
 
 
